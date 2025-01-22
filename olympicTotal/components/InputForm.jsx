@@ -1,107 +1,110 @@
-import React, { useState } from "react";
+import React from "react";
 import Button from "./Button";
+import Input from "./Input";
 
-const InputForm = () => {
-  const [countryName, setCountryName] = useState("");
-  const [goldMedal, setGoldMedal] = useState(0);
-  const [silverMedal, setSilverMedal] = useState(0);
-  const [bronzeMedal, setBronzeMedal] = useState(0);
-
+const InputForm = ({ formData, setFormData }) => {
   const addCountryHandler = () => {
-    const getData = JSON.parse(localStorage.getItem("data"));
-    let ifReturn = false;
-    if (getData !== null) {
-      getData.map((e) => {
-        if (e.countryName === countryName) {
-          ifReturn = true;
-          return;
-        }
-      });
-    }
-    if (ifReturn) {
+    const getData = JSON.parse(localStorage.getItem("data")) || [];
+    const isDuplicate = getData.some(
+      (item) => item.countryName === formData.countryName
+    );
+
+    if (isDuplicate) {
       alert("이미 존재하는 국가입니다.");
       return;
     }
-    if (countryName === "") {
+
+    if (!formData.countryName) {
       alert("국가명을 입력해주십시오.");
       return;
     }
-    const value = {
-      countryName: countryName,
-      goldMedal: goldMedal,
-      silverMedal: silverMedal,
-      bronzeMedal: bronzeMedal,
-    };
 
-    if (getData !== null) {
-      let newData = [...getData, value];
-      localStorage.setItem("data", JSON.stringify(newData));
-    } else {
-      localStorage.setItem("data", JSON.stringify([value]));
+    if (
+      formData.goldMedal < 0 ||
+      formData.silverMedal < 0 ||
+      formData.bronzeMedal < 0
+    ) {
+      alert("메달 숫자에 음수가 들어갈 수 없습니다.");
+      return;
     }
+
+    const newEntry = { ...formData };
+    localStorage.setItem("data", JSON.stringify([...getData, newEntry]));
+    alert("국가가 성공적으로 추가되었습니다!");
   };
+
   const updateCountryHandler = () => {
-    const getData = JSON.parse(localStorage.getItem("data"));
-    if (countryName === "") {
+    const getData = JSON.parse(localStorage.getItem("data")) || [];
+    const existingEntryIndex = getData.findIndex(
+      (item) => item.countryName === formData.countryName
+    );
+
+    if (!formData.countryName) {
       alert("국가명을 입력하여 주십시오.");
       return;
     }
-    if (getData !== null) {
-      let update = getData.filter((e) => e.countryName === countryName);
-      if (!update[0]) {
-        alert("일치하는 국가명이 없습니다.");
-        return;
-      }
-      update = {
-        countryName: countryName,
-        goldMedal: goldMedal,
-        silverMedal: silverMedal,
-        bronzeMedal: bronzeMedal,
-      };
-      let newData = getData.map((d) => {
-        if (d.countryName === countryName) {
-          return update;
-        } else return d;
-      });
 
-      localStorage.setItem("data", JSON.stringify(newData));
+    if (existingEntryIndex === -1) {
+      alert("일치하는 국가명이 없습니다.");
+      return;
     }
+
+    getData[existingEntryIndex] = { ...formData };
+    localStorage.setItem("data", JSON.stringify(getData));
+    alert("국가 정보가 성공적으로 업데이트되었습니다!");
   };
+
   return (
-    <form style={{ display: "flex", gap: "10px", alignItems: "end" }}>
-      <div>
-        <div>국가명</div>
-        <input
-          type="text"
-          value={countryName}
-          placeholder="국가 입력"
-          onChange={(e) => setCountryName(e.target.value)}
-        />
-      </div>
-      <div>
-        <div>금메달</div>
-        <input
-          type="number"
-          value={goldMedal}
-          onChange={(e) => setGoldMedal(Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <div>은메달</div>
-        <input
-          type="number"
-          value={silverMedal}
-          onChange={(e) => setSilverMedal(Number(e.target.value))}
-        />
-      </div>
-      <div>
-        <div>동메달</div>
-        <input
-          type="number"
-          value={bronzeMedal}
-          onChange={(e) => setBronzeMedal(Number(e.target.value))}
-        />
-      </div>
+    <form
+      style={{
+        display: "flex",
+        gap: "10px",
+        alignItems: "end",
+        justifyContent: "center",
+      }}
+    >
+      <Input
+        label="국가명"
+        type="text"
+        value={formData.countryName}
+        placeholder="국가 입력"
+        onChange={(e) =>
+          setFormData((prev) => ({ ...prev, countryName: e.target.value }))
+        }
+      />
+      <Input
+        label="금메달"
+        type="number"
+        value={formData.goldMedal}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            goldMedal: Number(e.target.value),
+          }))
+        }
+      />
+      <Input
+        label="은메달"
+        type="number"
+        value={formData.silverMedal}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            silverMedal: Number(e.target.value),
+          }))
+        }
+      />
+      <Input
+        label="동메달"
+        type="number"
+        value={formData.bronzeMedal}
+        onChange={(e) =>
+          setFormData((prev) => ({
+            ...prev,
+            bronzeMedal: Number(e.target.value),
+          }))
+        }
+      />
       <Button font="black" color="#ffcc00" onClick={addCountryHandler}>
         국가 추가
       </Button>
@@ -111,4 +114,5 @@ const InputForm = () => {
     </form>
   );
 };
+
 export default InputForm;

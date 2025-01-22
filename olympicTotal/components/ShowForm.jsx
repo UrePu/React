@@ -6,12 +6,16 @@ const styles = {
   table: {
     display: "flex",
     flexDirection: "column",
-    width: "1000px",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "1020px",
     marginTop: "20px",
+    marginLeft: "15px",
   },
   head: {
     display: "flex",
     color: "white",
+    width: " 100%",
     fontWeight: "700",
     fontSize: "16px",
     height: "45px",
@@ -30,6 +34,7 @@ const styles = {
   row: (index, isLast) => ({
     display: "flex",
     height: "45px",
+    width: " 100%",
     alignItems: "center",
     backgroundColor: index % 2 === 0 ? "#e5e6fa" : "#f5f4f9",
     fontWeight: "700",
@@ -37,6 +42,7 @@ const styles = {
     borderRadius: isLast ? "0px 0px 15px 15px" : "0px",
   }),
   noData: {
+    width: "990px",
     textAlign: "center",
     fontSize: "20px",
     color: "#555",
@@ -47,7 +53,7 @@ const styles = {
 };
 
 // ShowForm 컴포넌트
-const ShowForm = () => {
+const ShowForm = ({ formData, setFormData }) => {
   const [gotData, setData] = useState(
     JSON.parse(localStorage.getItem("data")) || []
   );
@@ -77,8 +83,18 @@ const ShowForm = () => {
     }
 
     const sortedData = [...gotData].sort((a, b) => {
-      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
-      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+      const aValue =
+        key === "totalMedal"
+          ? Number(a.goldMedal) + Number(a.silverMedal) + Number(a.bronzeMedal)
+          : a[key];
+
+      const bValue =
+        key === "totalMedal"
+          ? Number(b.goldMedal) + Number(b.silverMedal) + Number(b.bronzeMedal)
+          : b[key];
+
+      if (aValue < bValue) return direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return direction === "asc" ? 1 : -1;
       return 0;
     });
 
@@ -93,6 +109,11 @@ const ShowForm = () => {
     localStorage.setItem("data", JSON.stringify(filteredData));
   };
 
+  const IntoInput = (name) => {
+    const filteredData = gotData.filter((d) => d.countryName === name);
+    setFormData(filteredData[0]);
+  };
+
   return (
     <div style={styles.table}>
       {gotData.length > 0 ? (
@@ -101,6 +122,7 @@ const ShowForm = () => {
           {gotData.map((data, index) => (
             <TableRow
               key={data.countryName}
+              IntoInput={IntoInput}
               data={data}
               index={index}
               isLast={index === gotData.length - 1}
@@ -140,19 +162,40 @@ const TableHeader = ({ sortData, sortConfig }) => (
       {sortConfig.key === "bronzeMedal" &&
         (sortConfig.direction === "asc" ? "▲" : "▼")}
     </div>
+    <div style={styles.cell} onClick={() => sortData("totalMedal")}>
+      총합
+      {sortConfig.key === "totalMedal" &&
+        (sortConfig.direction === "asc" ? "▲" : "▼")}
+    </div>
     <div style={styles.cell}>액션</div>
   </div>
 );
 
 // 행 컴포넌트
-const TableRow = ({ data, index, isLast, deleteControl }) => (
+const TableRow = ({
+  data,
+  index,
+  isLast,
+  deleteControl,
+  IntoInput,
+  totalMedal,
+}) => (
   <div style={styles.row(index, isLast)}>
-    <div style={styles.cell}>{data.countryName}</div>
+    <div onClick={() => IntoInput(data.countryName)} style={styles.cell}>
+      {data.countryName}
+    </div>
     <div style={styles.cell}>{data.goldMedal}</div>
     <div style={styles.cell}>{data.silverMedal}</div>
     <div style={styles.cell}>{data.bronzeMedal}</div>
     <div style={styles.cell}>
-      <Button onClick={() => deleteControl(data.countryName)}>삭제</Button>
+      {Number(data.goldMedal) +
+        Number(data.silverMedal) +
+        Number(data.bronzeMedal)}
+    </div>
+    <div style={styles.cell}>
+      <Button color="red" onClick={() => deleteControl(data.countryName)}>
+        삭제
+      </Button>
     </div>
   </div>
 );

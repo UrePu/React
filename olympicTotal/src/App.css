@@ -21,7 +21,6 @@ input {
   padding: 20px;
   margin: 0px auto;
   margin-top: 40px;
-  position: relative;
 }
 input:focus {
   outline: none;
