@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Button from "./Button";
 
 // 공통 스타일 정의
@@ -172,14 +172,7 @@ const TableHeader = ({ sortData, sortConfig }) => (
 );
 
 // 행 컴포넌트
-const TableRow = ({
-  data,
-  index,
-  isLast,
-  deleteControl,
-  IntoInput,
-  totalMedal,
-}) => (
+const TableRow = ({ data, index, isLast, deleteControl, IntoInput }) => (
   <div style={styles.row(index, isLast)}>
     <div onClick={() => IntoInput(data.countryName)} style={styles.cell}>
       {data.countryName}
